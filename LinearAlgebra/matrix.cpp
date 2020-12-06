@@ -14,18 +14,35 @@ Matrix::Matrix()
 	this->row=this->column=0;
 	this->value.reset();
 }
+Matrix::Matrix(const Matrix &A)
+{
+	this->clear();
+	this->row=A.row;
+	this->column=A.column;
+	this->value=std::make_unique<double[]>(this->row*this->column);
+	for(unsigned int i=0;i<this->row*this->column;i++) this->value[i]=A.value[i];
+}
 Matrix::Matrix(unsigned int row,unsigned int column,double value[])
 {
 	this->clear();
 	this->row=row,this->column=column;
 	if(row&&column)
 	{
-		this->value=std::make_shared<double[]>(row*column,0);
+		this->value=std::make_unique<double[]>(row*column);
 		for(unsigned int i=0;i<row*column;i++)
 			this->value[i]=value[i];
 	}
 	else
 		std::cerr<<"[ERROR]Can't get the element: empty matrix!"<<std::endl;
+}
+Matrix Matrix::operator=(const Matrix &A)
+{
+	this->clear();
+	this->row=A.row;
+	this->column=A.column;
+	this->value=std::make_unique<double[]>(this->row*this->column);
+	for(unsigned int i=0;i<this->row*this->column;i++) this->value[i]=A.value[i];
+	return A;
 }
 Matrix Matrix::row_echelon() const
 {
@@ -46,13 +63,13 @@ Matrix Matrix::row_echelon() const
 		if(mx!=i)
 		{
 			for(unsigned int j=i;j<re.get_column();j++)
-				std::swap(re.value[re.get_pos(i,j)],re.value[re.get_pos(mx,i)]);
+				std::swap(re.value[re.get_pos(i,j)],re.value[re.get_pos(mx,j)]);
 		}
 		for(unsigned int j=i+1;j<re.get_row();j++)
 		{
 			double div=re.get_element(j,i)/re.get_element(i,i);
 			for(unsigned int k=i;k<re.get_column();k++)
-				re.set_element(j,k,re.get_element(j,k)-get_element(i,k)*div);
+				re.set_element(j,k,re.get_element(j,k)-re.get_element(i,k)*div);
 		}
 	}
 	return re;
@@ -76,10 +93,11 @@ Matrix Matrix::reduced_row_echelon() const
 				break;
 			}
 		if(main_element==-1) continue;
-		for(unsigned int j=re.get_column()-1;j>=main_element;j--)
-			re.set_element(i,j,re.get_element(i,j)/re.get_element(i,main_element));
+		double div=re.get_element(i,main_element);
+		for(unsigned int j=main_element;j<re.get_column();j++)
+			re.set_element(i,j,re.get_element(i,j)/div);
 	}
-	for(unsigned int i=re.get_row()-1;i!=UINT_MAX;i--)
+	for(unsigned int i=re.get_row()-1;i>0;i--)
 	{
 		unsigned int main_element=-1;
 		for(unsigned int j=0;j<re.get_column();j++)
@@ -91,8 +109,11 @@ Matrix Matrix::reduced_row_echelon() const
 		if(main_element==-1) continue;
 		for(unsigned int j=0;j<i;j++)
 			if(fabs(re.get_element(j,main_element))>1e-6)
-				for(unsigned int k=re.get_column()-1;k>=main_element;k--)
-					re.set_element(j,k,re.get_element(j,k)-re.get_element(j,main_element)/get_element(i,main_element)*re.get_element(j,k));
+			{
+				double div=re.get_element(j,main_element)/re.get_element(i,main_element);
+				for(unsigned int k=main_element;k<re.get_column();k++)
+					re.set_element(j,k,re.get_element(j,k)-div*re.get_element(i,k));
+			}
 	}
 	return re;
 }
@@ -102,7 +123,8 @@ std::ostream& operator<<(std::ostream &output,const Matrix &A)
 		for(unsigned int i=0;i<A.row;i++)
 		{
 			for(unsigned int j=0;j<A.column;j++)
-				output<<std::fixed<<std::setprecision(2)<<A.get_element(i,j)<<' ';
+				if(fabs(A.get_element(i,j))<1e-6) output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<0.0<<' ';
+				else output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<A.get_element(i,j)<<' ';
 			output<<std::endl;
 		}
 	else output<<"[WARNING]The matrix is empty."<<std::endl;
@@ -244,7 +266,7 @@ void Matrix::set_size(const unsigned int &row,const unsigned int &column)
 {
 	this->clear();
 	this->row=row,this->column=column;
-	if(row&&column) this->value=std::make_shared<double[]>(row*column,0);
+	if(row&&column) this->value=std::make_unique<double[]>(row*column);
 	else std::cerr<<"[ERROR]Can't set size: empty matrix!"<<std::endl;
 }
 double Matrix::determinant() const
@@ -279,7 +301,7 @@ double Matrix::determinant() const
 		{
 			double div=tmp.get_element(j,i)/tmp.get_element(i,i);
 			for(unsigned int k=i;k<tmp.get_column();k++)
-				tmp.set_element(j,k,tmp.get_element(j,k)-get_element(i,k)*div);
+				tmp.set_element(j,k,tmp.get_element(j,k)-tmp.get_element(i,k)*div);
 		}
 	}
 	double re=flag;

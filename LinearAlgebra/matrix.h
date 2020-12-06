@@ -9,11 +9,13 @@ class Matrix
 {
 private:
 	unsigned int row,column;
-	std::shared_ptr<double[]>value;
+	std::unique_ptr<double[]>value;
 	unsigned int get_pos(const unsigned int &,const unsigned int &) const;
 public:
 	Matrix();
+	Matrix(const Matrix &);
 	Matrix(unsigned int,unsigned int,double[]);
+	Matrix operator=(const Matrix &);
 	Matrix row_echelon() const;
 	Matrix reduced_row_echelon() const;
 	friend std::ostream& operator<<(std::ostream &,const Matrix &);
