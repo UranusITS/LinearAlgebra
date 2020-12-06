@@ -14,7 +14,7 @@ private:
 public:
 	Matrix();
 	Matrix(const Matrix &);
-	Matrix(unsigned int,unsigned int,double[]);
+	Matrix(const unsigned int &,const unsigned int &,const double[]);
 	Matrix operator=(const Matrix &);
 	Matrix row_echelon() const;
 	Matrix reduced_row_echelon() const;

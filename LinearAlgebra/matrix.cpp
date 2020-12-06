@@ -22,7 +22,7 @@ Matrix::Matrix(const Matrix &A)
 	this->value=std::make_unique<double[]>(this->row*this->column);
 	for(unsigned int i=0;i<this->row*this->column;i++) this->value[i]=A.value[i];
 }
-Matrix::Matrix(unsigned int row,unsigned int column,double value[])
+Matrix::Matrix(const unsigned int &row,const unsigned int &column,const double value[])
 {
 	this->clear();
 	this->row=row,this->column=column;
@@ -33,7 +33,7 @@ Matrix::Matrix(unsigned int row,unsigned int column,double value[])
 			this->value[i]=value[i];
 	}
 	else
-		std::cerr<<"[ERROR]Can't get the element: empty matrix!"<<std::endl;
+		std::cerr<<"[ERROR]Can't generate an empty matrix!"<<std::endl;
 }
 Matrix Matrix::operator=(const Matrix &A)
 {

@@ -140,11 +140,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="linearvector.cpp" />
     <ClCompile Include="matrix.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="QuetionA.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="linearvector.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="QuetionA.h" />
   </ItemGroup>
