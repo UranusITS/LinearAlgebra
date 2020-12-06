@@ -2,6 +2,7 @@
 #include<iomanip>
 #include<cmath>
 #include<climits>
+#include<memory>
 #include"matrix.h"
 unsigned int Matrix::get_pos(const unsigned int &row,const unsigned int &column) const
 {
@@ -11,7 +12,7 @@ unsigned int Matrix::get_pos(const unsigned int &row,const unsigned int &column)
 Matrix::Matrix()
 {
 	this->row=this->column=0;
-	this->value=nullptr;
+	this->value.reset();
 }
 Matrix::Matrix(unsigned int row,unsigned int column,double value[])
 {
@@ -19,18 +20,12 @@ Matrix::Matrix(unsigned int row,unsigned int column,double value[])
 	this->row=row,this->column=column;
 	if(row&&column)
 	{
-		this->value=new double[row*column];
+		this->value=std::make_shared<double[]>(row*column,0);
 		for(unsigned int i=0;i<row*column;i++)
 			this->value[i]=value[i];
 	}
 	else
-	{
 		std::cerr<<"[ERROR]Can't get the element: empty matrix!"<<std::endl;
-	}
-}
-Matrix::~Matrix()
-{
-	//this->clear();
 }
 Matrix Matrix::row_echelon() const
 {
@@ -132,15 +127,6 @@ std::istream &operator>>(std::istream &input,Matrix &A)
 	else std::cerr<<"[ERROR]Can't input the matrix: matrix of 0*0 is not supported!"<<std::endl;
 	return input;
 }
-Matrix& Matrix::operator=(Matrix A)
-{
-	this->clear();
-	this->row=A.row,this->column=A.column;
-	this->value=new double[this->row*this->column];
-	for(unsigned int i=0;i<this->row*this->column;i++)
-		this->value[i]=A.value[i];
-	return *this;
-}
 Matrix operator+(const Matrix &A,const Matrix &B)
 {
 	Matrix re;
@@ -217,8 +203,7 @@ void Matrix::clear()
 {
 	if(!this->empty())
 	{
-		delete[] this->value;
-		this->value=nullptr;
+		this->value.reset();
 		this->row=this->column=0;
 	}
 }
@@ -259,7 +244,7 @@ void Matrix::set_size(const unsigned int &row,const unsigned int &column)
 {
 	this->clear();
 	this->row=row,this->column=column;
-	if(row&&column) this->value=new double[row*column]{};
+	if(row&&column) this->value=std::make_shared<double[]>(row*column,0);
 	else std::cerr<<"[ERROR]Can't set size: empty matrix!"<<std::endl;
 }
 double Matrix::determinant() const
@@ -299,6 +284,7 @@ double Matrix::determinant() const
 	}
 	double re=flag;
 	for(unsigned int i=0;i<tmp.get_column();i++) re*=tmp.get_element(i,i);
+	tmp.clear();
 	return re;
 }
 double Matrix::cominor(const unsigned int &row,const unsigned int &column) const

@@ -1,4 +1,5 @@
 #include<iostream>
+#include<memory>
 #pragma once
 
 #ifndef MATRIX_H
@@ -8,17 +9,15 @@ class Matrix
 {
 private:
 	unsigned int row,column;
-	double *value;
+	std::shared_ptr<double[]>value;
 	unsigned int get_pos(const unsigned int &,const unsigned int &) const;
 public:
 	Matrix();
 	Matrix(unsigned int,unsigned int,double[]);
-	~Matrix();
 	Matrix row_echelon() const;
 	Matrix reduced_row_echelon() const;
 	friend std::ostream& operator<<(std::ostream &,const Matrix &);
 	friend std::istream& operator>>(std::istream &,Matrix &);
-	Matrix& operator=(Matrix);
 	friend Matrix operator+(const Matrix &,const Matrix &);
 	friend Matrix operator-(const Matrix &,const Matrix &);
 	friend Matrix operator*(const double &,const Matrix &);
