@@ -10,11 +10,14 @@ class Matrix
 private:
 	unsigned int row,column;
 	std::unique_ptr<double[]>value;
-	unsigned int get_pos(const unsigned int &,const unsigned int &) const;
 public:
 	Matrix();
 	Matrix(const Matrix &);
+	Matrix(Matrix &&)=default;
 	Matrix(const unsigned int &,const unsigned int &,const double[]);
+	~Matrix()=default;
+	double &operator()(const unsigned int &,const unsigned int &) const;
+	double &at(const unsigned int &,const unsigned int &) const;
 	Matrix operator=(const Matrix &);
 	Matrix row_echelon() const;
 	Matrix reduced_row_echelon() const;
@@ -30,8 +33,6 @@ public:
 	unsigned int size() const;
 	void clear();
 	bool empty() const;
-	double get_element(const unsigned int &,const unsigned int &) const;
-	void set_element(const unsigned int &,const unsigned int &,const double &);
 	void set_size(const unsigned int &,const unsigned int &);
 	double determinant() const;
 	double cominor(const unsigned int &,const unsigned int &) const;

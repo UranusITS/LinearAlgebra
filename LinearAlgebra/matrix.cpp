@@ -4,11 +4,6 @@
 #include<climits>
 #include<memory>
 #include"matrix.h"
-unsigned int Matrix::get_pos(const unsigned int &row,const unsigned int &column) const
-{
-	if(!this->empty()) return row*this->column+column;
-	else return 0;
-}
 Matrix::Matrix()
 {
 	this->row=this->column=0;
@@ -35,6 +30,18 @@ Matrix::Matrix(const unsigned int &row,const unsigned int &column,const double v
 	else
 		std::cerr<<"[ERROR]Can't generate an empty matrix!"<<std::endl;
 }
+double& Matrix::operator()(const unsigned int &row,const unsigned int &column) const
+{
+	return this->value[row*this->column+column];
+}
+double& Matrix::at(const unsigned int &row,const unsigned int &column) const
+{
+	if(row>=this->row||column>=this->column)
+	{
+		throw std::out_of_range("The matrix is not big enough.");
+	}
+	return this->value[row*this->column+column];
+}
 Matrix Matrix::operator=(const Matrix &A)
 {
 	this->clear();
@@ -57,19 +64,19 @@ Matrix Matrix::row_echelon() const
 	{
 		unsigned int mx=i;
 		for(unsigned int j=i+1;j<re.get_row();j++)
-			if(fabs(re.get_element(j,i))>fabs(re.get_element(mx,i)))
+			if(fabs(re(j,i))>fabs(re(mx,i)))
 				mx=j;
-		if(fabs(re.get_element(mx,i))<1e-6) continue;
+		if(fabs(re(mx,i))<1e-6) continue;
 		if(mx!=i)
 		{
 			for(unsigned int j=i;j<re.get_column();j++)
-				std::swap(re.value[re.get_pos(i,j)],re.value[re.get_pos(mx,j)]);
+				std::swap(re(i,j),re(mx,j));
 		}
 		for(unsigned int j=i+1;j<re.get_row();j++)
 		{
-			double div=re.get_element(j,i)/re.get_element(i,i);
+			double div=re(j,i)/re(i,i);
 			for(unsigned int k=i;k<re.get_column();k++)
-				re.set_element(j,k,re.get_element(j,k)-re.get_element(i,k)*div);
+				re(j,k)=re(j,k)-re(i,k)*div;
 		}
 	}
 	return re;
@@ -87,44 +94,44 @@ Matrix Matrix::reduced_row_echelon() const
 	{
 		unsigned int main_element=-1;
 		for(unsigned int j=0;j<re.get_column();j++)
-			if(fabs(re.get_element(i,j))>1e-6)
+			if(fabs(re(i,j))>1e-6)
 			{
 				main_element=j;
 				break;
 			}
 		if(main_element==-1) continue;
-		double div=re.get_element(i,main_element);
+		double div=re(i,main_element);
 		for(unsigned int j=main_element;j<re.get_column();j++)
-			re.set_element(i,j,re.get_element(i,j)/div);
+			re(i,j)=re(i,j)/div;
 	}
 	for(unsigned int i=re.get_row()-1;i>0;i--)
 	{
 		unsigned int main_element=-1;
 		for(unsigned int j=0;j<re.get_column();j++)
-			if(fabs(re.get_element(i,j))>1e-6)
+			if(fabs(re(i,j))>1e-6)
 			{
 				main_element=j;
 				break;
 			}
 		if(main_element==-1) continue;
 		for(unsigned int j=0;j<i;j++)
-			if(fabs(re.get_element(j,main_element))>1e-6)
+			if(fabs(re(j,main_element))>1e-6)
 			{
-				double div=re.get_element(j,main_element)/re.get_element(i,main_element);
+				double div=re(j,main_element)/re(i,main_element);
 				for(unsigned int k=main_element;k<re.get_column();k++)
-					re.set_element(j,k,re.get_element(j,k)-div*re.get_element(i,k));
+					re(j,k)=re(j,k)-div*re(i,k);
 			}
 	}
 	return re;
 }
-std::ostream& operator<<(std::ostream &output,const Matrix &A)
+std::ostream &operator<<(std::ostream &output,const Matrix &A)
 {
 	if(!A.empty())
 		for(unsigned int i=0;i<A.row;i++)
 		{
 			for(unsigned int j=0;j<A.column;j++)
-				if(fabs(A.get_element(i,j))<1e-6) output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<0.0<<' ';
-				else output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<A.get_element(i,j)<<' ';
+				if(fabs(A(i,j))<1e-6) output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<0.0<<' ';
+				else output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<A(i,j)<<' ';
 			output<<std::endl;
 		}
 	else output<<"[WARNING]The matrix is empty."<<std::endl;
@@ -143,7 +150,7 @@ std::istream &operator>>(std::istream &input,Matrix &A)
 			for(unsigned int j=0;j<column;j++)
 			{
 				input>>tmp;
-				A.set_element(i,j,tmp);
+				A(i,j)=tmp;
 			}
 	}
 	else std::cerr<<"[ERROR]Can't input the matrix: matrix of 0*0 is not supported!"<<std::endl;
@@ -158,7 +165,7 @@ Matrix operator+(const Matrix &A,const Matrix &B)
 		re.set_size(A.get_row(),A.get_column());
 		for(unsigned int i=0;i<re.row;i++)
 			for(unsigned int j=0;j<re.column;j++)
-				re.set_element(i,j,A.get_element(i,j)+B.get_element(i,j));
+				re(i,j)=A(i,j)+B(i,j);
 	}
 	return re;
 }
@@ -171,7 +178,7 @@ Matrix operator-(const Matrix &A,const Matrix &B)
 		re.set_size(A.get_row(),A.get_column());
 		for(unsigned int i=0;i<re.row;i++)
 			for(unsigned int j=0;j<re.column;j++)
-				re.set_element(i,j,A.get_element(i,j)-B.get_element(i,j));
+				re(i,j)=A(i,j)-B(i,j);
 	}
 	return re;
 }
@@ -181,10 +188,10 @@ Matrix operator*(const double &k,const Matrix &A)
 	if(A.empty()) std::cerr<<"[WARNING]The matrix is empty."<<std::endl;
 	else
 	{
-		re=A;
+		re.set_size(A.get_row(),A.get_column());
 		for(unsigned int i=0;i<re.row;i++)
 			for(unsigned int j=0;j<re.column;j++)
-				re.set_element(i,j,re.get_element(i,j)*k);
+				re(i,j)=A(i,j)*k;
 	}
 	return re;
 }
@@ -198,7 +205,7 @@ Matrix operator*(const Matrix &A,const Matrix &B)
 		for(unsigned int i=0;i<A.get_row();i++)
 			for(unsigned int j=0;j<B.get_column();j++)
 				for(unsigned int k=0;k<A.get_column();k++)
-					re.set_element(i,j,re.get_element(i,j)+A.get_element(i,k)*B.get_element(k,j));
+					re(i,j)+=A(i,k)*B(k,j);
 	}
 	return re;
 }
@@ -206,7 +213,7 @@ Matrix identity_matrix(const unsigned int &x)
 {
 	Matrix re;
 	re.set_size(x,x);
-	for(unsigned int i=0;i<x;i++) re.set_element(i,i,1);
+	for(unsigned int i=0;i<x;i++) re(i,i)=1;
 	return re;
 }
 unsigned int Matrix::get_row() const
@@ -234,34 +241,6 @@ bool Matrix::empty() const
 	if(this->size()) return false;
 	else return true;
 }
-double Matrix::get_element(const unsigned int &row,const unsigned int &column) const
-{
-	if(row>this->row||column>this->column)
-	{
-		std::cerr<<"[ERROR]Can't get the element: matrix not big enough!"<<std::endl;
-		return 0;
-	}
-	else if(this->empty())
-	{
-		std::cerr<<"[ERROR]Can't get the element: empty matrix!"<<std::endl;
-		return 0;
-	}
-	return this->value[this->get_pos(row,column)];
-}
-void Matrix::set_element(const unsigned int &row,const unsigned int &column,const double &new_value)
-{
-	if(row>this->row||column>this->column)
-	{
-		std::cerr<<"[ERROR]Can't set the element: matrix not big enough!"<<std::endl;
-		return ;
-	}
-	else if(this->empty())
-	{
-		std::cerr<<"[ERROR]Can't set the element: empty matrix!"<<std::endl;
-		return ;
-	}
-	this->value[this->get_pos(row,column)]=new_value;
-}
 void Matrix::set_size(const unsigned int &row,const unsigned int &column)
 {
 	this->clear();
@@ -288,25 +267,24 @@ double Matrix::determinant() const
 	{
 		unsigned int mx=i;
 		for(unsigned int j=i+1;j<tmp.get_row();j++)
-			if(fabs(tmp.get_element(j,i))>fabs(tmp.get_element(mx,i)))
+			if(fabs(tmp(j,i))>fabs(tmp(mx,i)))
 				mx=j;
-		if(fabs(tmp.get_element(mx,i))<1e-6) return 0;
+		if(fabs(tmp(mx,i))<1e-6) return 0;
 		if(mx!=i)
 		{
 			flag*=-1;
 			for(unsigned int j=i;j<tmp.get_column();j++)
-				std::swap(tmp.value[tmp.get_pos(i,j)],tmp.value[tmp.get_pos(mx,j)]);
+				std::swap(tmp(i,j),tmp(mx,j));
 		}
 		for(unsigned int j=i+1;j<tmp.get_row();j++)
 		{
-			double div=tmp.get_element(j,i)/tmp.get_element(i,i);
+			double div=tmp(j,i)/tmp(i,i);
 			for(unsigned int k=i;k<tmp.get_column();k++)
-				tmp.set_element(j,k,tmp.get_element(j,k)-tmp.get_element(i,k)*div);
+				tmp(j,k)-=tmp(i,k)*div;
 		}
 	}
 	double re=flag;
-	for(unsigned int i=0;i<tmp.get_column();i++) re*=tmp.get_element(i,i);
-	tmp.clear();
+	for(unsigned int i=0;i<tmp.get_column();i++) re*=tmp(i,i);
 	return re;
 }
 double Matrix::cominor(const unsigned int &row,const unsigned int &column) const
@@ -326,16 +304,16 @@ double Matrix::cominor(const unsigned int &row,const unsigned int &column) const
 	for(unsigned int i=0;i<row;i++)
 	{
 		for(unsigned int j=0;j<column;j++)
-			tmp.set_element(i,j,this->get_element(i,j));
+			tmp(i,j)=(*this)(i,j);
 		for(unsigned int j=column+1;j<this->get_column();j++)
-			tmp.set_element(i,j-1,this->get_element(i,j));
+			tmp(i,j-1)=(*this)(i,j);
 	}
 	for(unsigned int i=row+1;i<this->get_row();i++)
 	{
 		for(unsigned int j=0;j<column;j++)
-			tmp.set_element(i-1,j,this->get_element(i,j));
+			tmp(i-1,j)=(*this)(i,j);
 		for(unsigned int j=column+1;j<this->get_column();j++)
-			tmp.set_element(i-1,j-1,this->get_element(i,j));
+			tmp(i-1,j-1)=(*this)(i,j);
 	}
 	return tmp.determinant();
 }
@@ -353,7 +331,7 @@ double Matrix::trace() const
 	}
 	double re=0;
 	for(unsigned int i=0;i<this->get_column();i++)
-		re+=this->get_element(i,i);
+		re+=(*this)(i,i);
 	return re;
 }
 Matrix Matrix::power(unsigned int x) const
@@ -391,7 +369,7 @@ Matrix Matrix::transpose() const
 	re.set_size(this->get_column(),this->get_row());
 	for(unsigned int i=0;i<this->get_column();i++)
 		for(unsigned int j=0;j<this->get_row();j++)
-			re.set_element(i,j,this->get_element(j,i));
+			re(i,j)=(*this)(j,i);
 	return re;
 }
 Matrix Matrix::adjugate() const
@@ -411,9 +389,9 @@ Matrix Matrix::adjugate() const
 	for(unsigned int i=0;i<this->get_column();i++)
 		for(unsigned int j=0;j<this->get_row();j++)
 			if((i+j)&1)
-				re.set_element(i,j,-this->cominor(i,j));
+				re(i,j)=(*this)(i,j);
 			else
-				re.set_element(i,j,this->cominor(i,j));
+				re(i,j)=this->cominor(i,j);
 	return re;
 }
 Matrix Matrix::inverse() const
@@ -450,7 +428,7 @@ Matrix Matrix::solve_linear_equation() const
 	{
 		unsigned int cnt=0;
 		for(unsigned int j=0;j<tmp.get_column();j++)
-			if(fabs(tmp.get_element(i,j))>1e-6)
+			if(fabs(tmp(i,j))>1e-6)
 				cnt++;
 		if(cnt>1)
 		{
