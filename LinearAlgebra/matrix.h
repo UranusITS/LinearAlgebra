@@ -1,6 +1,7 @@
+#pragma once
 #include<iostream>
 #include<memory>
-#pragma once
+#include"linearvector.h"
 
 #ifndef MATRIX_H
 #define MATRIX_H
@@ -15,9 +16,11 @@ public:
 	Matrix(const Matrix &);
 	Matrix(Matrix &&)=default;
 	Matrix(const unsigned int &,const unsigned int &,const double[]);
+	Matrix(const unsigned int &,const unsigned int &);
+	Matrix(const VectorGroup &);
 	~Matrix()=default;
-	double &operator()(const unsigned int &,const unsigned int &) const;
-	double &at(const unsigned int &,const unsigned int &) const;
+	double& operator()(const unsigned int &,const unsigned int &) const;
+	double& at(const unsigned int &,const unsigned int &) const;
 	Matrix operator=(const Matrix &);
 	Matrix row_echelon() const;
 	Matrix reduced_row_echelon() const;
@@ -33,6 +36,7 @@ public:
 	unsigned int size() const;
 	void clear();
 	bool empty() const;
+	bool iszero() const;
 	void set_size(const unsigned int &,const unsigned int &);
 	double determinant() const;
 	double cominor(const unsigned int &,const unsigned int &) const;
@@ -41,7 +45,8 @@ public:
 	Matrix transpose() const;
 	Matrix adjugate() const;
 	Matrix inverse() const;
-	Matrix solve_linear_equation() const;
+	VectorGroup solve_linear_equation() const;
+	VectorGroup max_linear_independent_group() const;
 };
 
 #endif

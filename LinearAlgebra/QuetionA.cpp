@@ -1,6 +1,8 @@
 #include<iostream>
 #include<vector>
 #include"QuetionA.h"
+#include"matrix.h"
+#include"linearvector.h"
 long long Pow(long long x,int y)
 {
     long long tmp=x,re=1;
@@ -61,6 +63,15 @@ int QuestionA::main()
     init_matrix(A);
     std::cout<<"A="<<std::endl<<A<<std::endl;
     std::cout<<"det(A)= "<<A.determinant()<<std::endl<<std::endl;
-    std::cout<<"the reduced row-echelon matrix of A is:"<<std::endl<<A.reduced_row_echelon()<<std::endl;
+    std::cout<<"The reduced row-echelon matrix of A is:"<<std::endl<<A.reduced_row_echelon()<<std::endl;
+    VectorGroup result=A.solve_linear_equation();
+    if(result.size()==1)
+        std::cout<<"The result of the equition Ax=0:"<<std::endl<<result<<std::endl;
+    else
+        std::cout<<"The basic solution system of the equition Ax=0:"<<std::endl<<result<<std::endl;
+    result=A.max_linear_independent_group();
+    std::cout<<"The maximally linear independent group of A:"<<std::endl<<result<<std::endl;
+    result.schmidt();
+    std::cout<<"The maximally linear independent group of A after Schmidt orthogonalization:"<<std::endl<<result<<std::endl;
     return 0;
 }

@@ -2,8 +2,8 @@
 #include<iomanip>
 #include<cmath>
 #include<climits>
-#include<memory>
 #include"matrix.h"
+#include"linearvector.h"
 Matrix::Matrix()
 {
 	this->row=this->column=0;
@@ -29,6 +29,28 @@ Matrix::Matrix(const unsigned int &row,const unsigned int &column,const double v
 	}
 	else
 		std::cerr<<"[ERROR]Can't generate an empty matrix!"<<std::endl;
+}
+Matrix::Matrix(const unsigned int &row,const unsigned int &column)
+{
+	this->clear();
+	this->row=row,this->column=column;
+	if(row&&column)
+	{
+		this->value=std::make_unique<double[]>(row*column);
+		for(unsigned int i=0;i<row*column;i++)
+			this->value[i]=0;
+	}
+	else
+		std::cerr<<"[ERROR]Can't generate an empty matrix!"<<std::endl;
+}
+Matrix::Matrix(const VectorGroup &VG)
+{
+	this->clear();
+	this->row=VG.get_height();
+	this->column=VG.size();
+	for(unsigned int i=0;i<VG.get_height();i++)
+		for(unsigned int j=0;j<VG.size();j++)
+			(*this)(i,j)=VG(i,j);
 }
 double& Matrix::operator()(const unsigned int &row,const unsigned int &column) const
 {
@@ -241,6 +263,14 @@ bool Matrix::empty() const
 	if(this->size()) return false;
 	else return true;
 }
+bool Matrix::iszero() const
+{
+	for(unsigned int i=0;i<this->get_row();i++)
+		for(unsigned int j=0;j<this->get_row();j++)
+			if(fabs((*this)(i,j))>1e-6)
+				return false;
+	return true;
+}
 void Matrix::set_size(const unsigned int &row,const unsigned int &column)
 {
 	this->clear();
@@ -415,32 +445,88 @@ Matrix Matrix::inverse() const
 	re=(1/this->determinant())*this->adjugate();
 	return re;
 }
-Matrix Matrix::solve_linear_equation() const
+VectorGroup Matrix::solve_linear_equation() const
 {
-	Matrix tmp;
+	VectorGroup re;
 	if(this->empty())
 	{
 		std::cerr<<"[WARNING]The matrix is empty."<<std::endl;
-		return tmp;
+		return re;
 	}
-	tmp=this->reduced_row_echelon();
-	for(unsigned int i=tmp.get_row()-1;i!=UINT_MAX;i--)
-	{
-		unsigned int cnt=0;
+	else if(this->iszero())
+		return re;
+	Matrix tmp=this->reduced_row_echelon();
+	std::unique_ptr<bool[]>vis=std::make_unique<bool[]>(this->get_column());
+	for(unsigned int i=0;i<tmp.get_column();i++)
+		vis[i]=false;
+	for(unsigned int i=0;i<tmp.get_row();i++)
 		for(unsigned int j=0;j<tmp.get_column();j++)
 			if(fabs(tmp(i,j))>1e-6)
-				cnt++;
-		if(cnt>1)
+			{
+				vis[j]=true;
+				break;
+			}
+	for(unsigned int i=0;i<tmp.get_column();i++)
+	{
+		if(vis[i]) continue;
+		bool flag=false;
+		unsigned int last=0;
+		for(unsigned int j=0;j<tmp.get_row();j++)
+			if(fabs(tmp(i,j))>1e-6)
+			{
+				flag=true;
+				last=j;
+			}
+		if(flag)
 		{
-			break;
-		}
-		else if(i==0)
-		{
-			Matrix re;
-			re.set_size(tmp.get_row(),1);
-			return re;
+			Vector vtmp(this->get_column());
+			for(unsigned int j=0;j<this->get_row();j++)
+				if(fabs(tmp(i,j))>1e-6)
+				{
+					if(j==last)
+						vtmp[j]=1;
+					else
+						vtmp[j]=tmp(j,i)/tmp(last,i);
+				}
+			re.add(vtmp);
 		}
 	}
-	///TODO
-	return tmp;
+	if(re.empty())
+	{
+		Vector vtmp(tmp.get_column());
+		re.add(vtmp);
+	}
+	return re;
+}
+VectorGroup Matrix::max_linear_independent_group() const
+{
+	VectorGroup re;
+	if(this->empty())
+	{
+		std::cerr<<"[WARNING]The matrix is empty."<<std::endl;
+		return re;
+	}
+	else if(this->iszero())
+		return re;
+	Matrix tmp=this->transpose();
+	Matrix red=tmp.reduced_row_echelon();
+	tmp=tmp.transpose();
+	for(unsigned int i=0;i<red.get_column();i++)
+	{
+		bool flag=false;
+		for(unsigned int j=0;j<red.get_row();j++)
+			if(fabs(red(i,j))>1e-6)
+			{
+				flag=true;
+				break;
+			}
+		if(flag)
+		{
+			Vector vtmp(tmp.get_row());
+			for(unsigned int j=0;j<tmp.get_row();j++)
+				vtmp[j]=tmp(j,i);
+			re.add(vtmp);
+		}
+	}
+	return re;
 }

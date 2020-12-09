@@ -1,5 +1,6 @@
-#include<memory>
 #pragma once
+#include<memory>
+#include<vector>
 
 #ifndef LINEARVECTOR_H
 #define LINEARVECTOR_H
@@ -12,7 +13,10 @@ private:
 public:
 	Vector();
 	Vector(const Vector &);
+	Vector(Vector &&)=default;
 	Vector(const unsigned int &,const double[]);
+	Vector(const unsigned int &);
+	~Vector();
 	Vector operator=(const Vector &);
 	double& operator[](const unsigned int &) const;
 	friend std::ostream &operator<<(std::ostream &,const Vector &);
@@ -26,8 +30,34 @@ public:
 	unsigned int size() const;
 	void clear();
 	bool empty() const;
+	bool iszero() const;
 	double mod() const;
 	void unitize();
+};
+
+class VectorGroup
+{
+private:
+	unsigned int height;
+	std::vector<Vector>value;
+public:
+	VectorGroup();
+	VectorGroup(const VectorGroup &);
+	VectorGroup(VectorGroup &&)=default;
+	VectorGroup(const unsigned int &,const Vector[]);
+	VectorGroup(const std::vector<Vector> &);
+	~VectorGroup();
+	VectorGroup operator=(const VectorGroup &);
+	double& operator()(const unsigned int &,const unsigned int &) const;
+	friend std::ostream &operator<<(std::ostream &,const VectorGroup &);
+	unsigned int size() const;
+	void clear();
+	bool empty() const;
+	unsigned int get_height() const;
+	void add(Vector &);
+	bool orthogonalize();
+	void unitize();
+	bool schmidt();
 };
 
 #endif
