@@ -66,10 +66,11 @@ std::ostream &operator<<(std::ostream &output,const Vector &A)
 {
 	if(!A.empty())
 	{
-		output<<'('<<std::setw(9)<<A[0];
+		if(fabs(A[0])<1e-4) output<<'('<<std::setw(9)<<std::fixed<<std::setprecision(2)<<0.0;
+		else output<<'('<<std::setw(9)<<std::fixed<<std::setprecision(2)<<A[0];
 		for(unsigned int i=1;i<A.length;i++)
 		{
-			if(fabs(A[i])<1e-6) output<<','<<std::setw(10)<<std::fixed<<std::setprecision(2)<<0.0;
+			if(fabs(A[i])<1e-4) output<<','<<std::setw(10)<<std::fixed<<std::setprecision(2)<<0.0;
 			else output<<','<<std::setw(10)<<std::fixed<<std::setprecision(2)<<A[i];
 		}
 		output<<')'<<std::endl;
@@ -176,7 +177,7 @@ bool Vector::empty() const
 bool Vector::iszero() const
 {
 	for(unsigned int i=0;i<this->size();i++)
-		if(fabs((*this)[i])>1e-6) return false;
+		if(fabs((*this)[i])>1e-4) return false;
 	return true;
 }
 double Vector::mod() const
@@ -236,6 +237,7 @@ VectorGroup::~VectorGroup()
 }
 VectorGroup VectorGroup::operator=(const VectorGroup &VG)
 {
+	std::cout<<"FUUUCK"<<std::endl;
 	this->clear();
 	if(!VG.empty())
 	{
@@ -291,6 +293,29 @@ void VectorGroup::add(Vector &x)
 			std::cerr<<"[ERROR]The vector added in has invalid size!"<<std::endl;
 		else
 			this->value.push_back(x);
+	}
+}
+void VectorGroup::append(const VectorGroup &VG)
+{
+	if(VG.empty())
+		return ;
+	if(this->empty())
+	{
+		(*this)=VG;
+		return ;
+	}
+	if(this->get_height()!=VG.get_height())
+	{
+		std::cerr<<"[ERROR]The VectorGroup appended in has invalid size!"<<std::endl;
+		std::cerr<<this->get_height()<<' '<<VG.get_height()<<std::endl<<std::endl;
+		return ;
+	}
+	Vector tmp(this->get_height());
+	for(unsigned int i=0;i<VG.size();i++)
+	{
+		for(unsigned int j=0;j<VG.get_height();j++)
+			tmp[j]=VG(i,j);
+		this->add(tmp);
 	}
 }
 bool VectorGroup::orthogonalize()

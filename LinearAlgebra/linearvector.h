@@ -55,6 +55,7 @@ public:
 	bool empty() const;
 	unsigned int get_height() const;
 	void add(Vector &);
+	void append(const VectorGroup &);
 	bool orthogonalize();
 	void unitize();
 	bool schmidt();

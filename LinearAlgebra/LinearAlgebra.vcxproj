@@ -144,11 +144,13 @@
     <ClCompile Include="matrix.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="QuetionA.cpp" />
+    <ClCompile Include="QuetionB.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="linearvector.h" />
     <ClInclude Include="matrix.h" />
     <ClInclude Include="QuetionA.h" />
+    <ClInclude Include="QuetionB.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

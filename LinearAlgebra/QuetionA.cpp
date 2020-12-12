@@ -57,21 +57,34 @@ void QuestionA::init_matrix(Matrix &A)
             a[pos++]=V[i][j];
     A=Matrix(10,10,a);
 }
+void QuestionA::subquetion_1(const Matrix &A)
+{
+    std::cout<<"A="<<std::endl<<A<<std::endl;
+}
+void QuestionA::subquetion_2(const Matrix &A)
+{
+    std::cout<<"det(A)= "<<A.determinant()<<std::endl<<std::endl;
+}
+void QuestionA::subquetion_3(const Matrix &A)
+{
+    std::cout<<"The reduced row-echelon matrix of A is:"<<std::endl<<A.reduced_row_echelon()<<std::endl;
+    VectorGroup result=A.solve_linear_equation();
+    std::cout<<"The basic solution system of the equition Ax=0:"<<std::endl<<result<<std::endl;
+}
+void QuestionA::subquetion_4(const Matrix &A)
+{
+    VectorGroup result=A.max_linear_independent_group();
+    std::cout<<"The maximally linear independent group of A:"<<std::endl<<result<<std::endl;
+    result.schmidt();
+    std::cout<<"The maximally linear independent group of A after Schmidt orthogonalization:"<<std::endl<<result<<std::endl;
+}
 int QuestionA::main()
 {
     Matrix A;
     init_matrix(A);
-    std::cout<<"A="<<std::endl<<A<<std::endl;
-    std::cout<<"det(A)= "<<A.determinant()<<std::endl<<std::endl;
-    std::cout<<"The reduced row-echelon matrix of A is:"<<std::endl<<A.reduced_row_echelon()<<std::endl;
-    VectorGroup result=A.solve_linear_equation();
-    if(result.size()==1)
-        std::cout<<"The result of the equition Ax=0:"<<std::endl<<result<<std::endl;
-    else
-        std::cout<<"The basic solution system of the equition Ax=0:"<<std::endl<<result<<std::endl;
-    result=A.max_linear_independent_group();
-    std::cout<<"The maximally linear independent group of A:"<<std::endl<<result<<std::endl;
-    result.schmidt();
-    std::cout<<"The maximally linear independent group of A after Schmidt orthogonalization:"<<std::endl<<result<<std::endl;
+    subquetion_1(A);
+    subquetion_2(A);
+    subquetion_3(A);
+    subquetion_4(A);
     return 0;
 }

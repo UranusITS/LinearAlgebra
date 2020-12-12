@@ -88,7 +88,7 @@ Matrix Matrix::row_echelon() const
 		for(unsigned int j=i+1;j<re.get_row();j++)
 			if(fabs(re(j,i))>fabs(re(mx,i)))
 				mx=j;
-		if(fabs(re(mx,i))<1e-6) continue;
+		if(fabs(re(mx,i))<1e-4) continue;
 		if(mx!=i)
 		{
 			for(unsigned int j=i;j<re.get_column();j++)
@@ -116,7 +116,7 @@ Matrix Matrix::reduced_row_echelon() const
 	{
 		unsigned int main_element=-1;
 		for(unsigned int j=0;j<re.get_column();j++)
-			if(fabs(re(i,j))>1e-6)
+			if(fabs(re(i,j))>1e-4)
 			{
 				main_element=j;
 				break;
@@ -130,14 +130,14 @@ Matrix Matrix::reduced_row_echelon() const
 	{
 		unsigned int main_element=-1;
 		for(unsigned int j=0;j<re.get_column();j++)
-			if(fabs(re(i,j))>1e-6)
+			if(fabs(re(i,j))>1e-4)
 			{
 				main_element=j;
 				break;
 			}
 		if(main_element==-1) continue;
 		for(unsigned int j=0;j<i;j++)
-			if(fabs(re(j,main_element))>1e-6)
+			if(fabs(re(j,main_element))>1e-4)
 			{
 				double div=re(j,main_element)/re(i,main_element);
 				for(unsigned int k=main_element;k<re.get_column();k++)
@@ -152,7 +152,7 @@ std::ostream &operator<<(std::ostream &output,const Matrix &A)
 		for(unsigned int i=0;i<A.row;i++)
 		{
 			for(unsigned int j=0;j<A.column;j++)
-				if(fabs(A(i,j))<1e-6) output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<0.0<<' ';
+				if(fabs(A(i,j))<1e-4) output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<0.0<<' ';
 				else output<<std::setw(10)<<std::fixed<<std::setprecision(2)<<A(i,j)<<' ';
 			output<<std::endl;
 		}
@@ -267,7 +267,7 @@ bool Matrix::iszero() const
 {
 	for(unsigned int i=0;i<this->get_row();i++)
 		for(unsigned int j=0;j<this->get_row();j++)
-			if(fabs((*this)(i,j))>1e-6)
+			if(fabs((*this)(i,j))>1e-4)
 				return false;
 	return true;
 }
@@ -299,7 +299,7 @@ double Matrix::determinant() const
 		for(unsigned int j=i+1;j<tmp.get_row();j++)
 			if(fabs(tmp(j,i))>fabs(tmp(mx,i)))
 				mx=j;
-		if(fabs(tmp(mx,i))<1e-6) return 0;
+		if(fabs(tmp(mx,i))<1e-4) return 0;
 		if(mx!=i)
 		{
 			flag*=-1;
@@ -456,12 +456,28 @@ VectorGroup Matrix::solve_linear_equation() const
 	else if(this->iszero())
 		return re;
 	Matrix tmp=this->reduced_row_echelon();
+	for(unsigned int i=0;i<tmp.get_column();i++)
+	{
+		bool flag=true;
+		for(unsigned int j=0;j<tmp.get_row();j++)
+			if(fabs(tmp(i,j))>1e-4)
+			{
+				flag=false;
+				break;
+			}
+		if(flag)
+		{
+			Vector vtmp(tmp.get_column());
+			vtmp[i]=1;
+			re.add(vtmp);
+		}
+	}
 	std::unique_ptr<bool[]>vis=std::make_unique<bool[]>(this->get_column());
 	for(unsigned int i=0;i<tmp.get_column();i++)
 		vis[i]=false;
 	for(unsigned int i=0;i<tmp.get_row();i++)
 		for(unsigned int j=0;j<tmp.get_column();j++)
-			if(fabs(tmp(i,j))>1e-6)
+			if(fabs(tmp(i,j))>1e-4)
 			{
 				vis[j]=true;
 				break;
@@ -472,7 +488,7 @@ VectorGroup Matrix::solve_linear_equation() const
 		bool flag=false;
 		unsigned int last=0;
 		for(unsigned int j=0;j<tmp.get_row();j++)
-			if(fabs(tmp(i,j))>1e-6)
+			if(fabs(tmp(i,j))>1e-4)
 			{
 				flag=true;
 				last=j;
@@ -481,7 +497,7 @@ VectorGroup Matrix::solve_linear_equation() const
 		{
 			Vector vtmp(this->get_column());
 			for(unsigned int j=0;j<this->get_row();j++)
-				if(fabs(tmp(i,j))>1e-6)
+				if(fabs(tmp(i,j))>1e-4)
 				{
 					if(j==last)
 						vtmp[j]=1;
@@ -515,7 +531,7 @@ VectorGroup Matrix::max_linear_independent_group() const
 	{
 		bool flag=false;
 		for(unsigned int j=0;j<red.get_row();j++)
-			if(fabs(red(i,j))>1e-6)
+			if(fabs(red(i,j))>1e-4)
 			{
 				flag=true;
 				break;

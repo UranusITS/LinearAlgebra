@@ -1,6 +1,7 @@
 #pragma once
 #include<iostream>
 #include<memory>
+#include<vector>
 #include"linearvector.h"
 
 #ifndef MATRIX_H
@@ -30,7 +31,6 @@ public:
 	friend Matrix operator-(const Matrix &,const Matrix &);
 	friend Matrix operator*(const double &,const Matrix &);
 	friend Matrix operator*(const Matrix &,const Matrix &);
-	friend Matrix identity_matrix(const unsigned int &);
 	unsigned int get_row() const;
 	unsigned int get_column() const;
 	unsigned int size() const;
@@ -48,5 +48,6 @@ public:
 	VectorGroup solve_linear_equation() const;
 	VectorGroup max_linear_independent_group() const;
 };
+Matrix identity_matrix(const unsigned int &);
 
 #endif

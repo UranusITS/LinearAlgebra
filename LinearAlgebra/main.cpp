@@ -1,9 +1,12 @@
 #include<iostream>
-#include"matrix.h"
 #include"QuetionA.h"
-using namespace std;
+#include"QuetionB.h"
 int main()
 {
+	std::cout<<"////////////////////////////////////////QUETION1////////////////////////////////////////"<<std::endl;
 	QuestionA::main();
+	std::cout<<std::endl<<std::endl;
+	std::cout<<"////////////////////////////////////////QUETION2////////////////////////////////////////"<<std::endl;
+	QuestionB::main();
 	return 0;
 }
